@@ -252,7 +252,7 @@ jobs:
 #          dockerfiles:
 #            ${{ env.JAVA_IMG_DIR }}/Containerfile
 #          build-args: |
-            BASE_IMG=${{ env.BASE_IMG }}
+#            BASE_IMG=${{ env.BASE_IMG }}
 
 #      - name: Push Java image
 #        if: |
