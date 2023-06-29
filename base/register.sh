@@ -52,10 +52,10 @@ if [ -z "${RUNNER_TOKEN:-}" ]; then
     if [ -n "${GITHUB_APP_ID:-}" ] && [ -n "${GITHUB_APP_INSTALL_ID:-}" ] && [ -n "${GITHUB_APP_PEM:-}" ]; then
         echo "GITHUB_APP environment variables are set. Using GitHub App authentication."
         app_token=$(get_github_app_token)
-        payload=$(curl -sSfLX POST -H "Authorization: token ${app_token}" ${token_url})
+        payload=$(curl -sSfLX POST -H "Authorization: token ${app_token}" -H 'Content-Length: 0' ${token_url})
     else
         echo "Using GITHUB_PAT for authentication."
-        payload=$(curl -sSfLX POST -H "Authorization: token ${GITHUB_PAT}" ${token_url})
+        payload=$(curl -sSfLX POST -H "Authorization: token ${GITHUB_PAT}"  -H 'Content-Length: 0' ${token_url})
     fi
 
     export RUNNER_TOKEN=$(echo $payload | jq .token --raw-output)
