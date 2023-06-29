@@ -4,7 +4,6 @@ on:
 
 env:
   REGISTRY_URL: quay.io/redhat-github-actions
-
   BASE_IMG_NAME: runner
   BASE_IMG_DIR: base
 
