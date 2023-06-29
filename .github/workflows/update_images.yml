@@ -1,9 +1,6 @@
 name: Update Runner Images
 on:
-  push:
-  pull_request:
   workflow_dispatch:
-
 
 env:
   REGISTRY_URL: quay.io/redhat-github-actions
@@ -13,16 +10,7 @@ env:
 
   BUILDAH_IMG_NAME: buildah-runner
   BUILDAH_IMG_DIR: buildah
-
-  K8S_TOOLS_IMG_NAME: k8s-tools-runner
-  K8S_TOOLS_IMG_DIR: k8s-tools
-
-  NODE_IMG_NAME: node-runner-14
-  NODE_IMG_DIR: node
-
-  JAVA_IMG_NAME: java-runner-11
-  JAVA_IMG_DIR: java
-
+  
 jobs:
   update_images:
     name: Update images
@@ -54,9 +42,6 @@ jobs:
             const dirsChanged = {
               [BASE]: false,
               buildah: false,
-              "k8s-tools": false,
-              java: false,
-              node: false,
             };
 
             Object.keys(dirsChanged).forEach((dir) => {
@@ -143,7 +128,7 @@ jobs:
         with:
           image: ${{ env.BASE_IMG_NAME }}
           tags: ${{ env.IMG_TAGS }}
-          registry: ${{ env.REGISTRY_URL }}
+          registry: ${{ secrets.REGISTRY_URL }}
           username: ${{ secrets.REGISTRY_USER }}
           password: ${{ secrets.REGISTRY_PASSWORD }}
 
@@ -188,96 +173,96 @@ jobs:
         with:
           image: ${{ env.BUILDAH_IMG_NAME }}
           tags: ${{ env.IMG_TAGS }}
-          registry: ${{ env.REGISTRY_URL }}
+          registry: ${{ secrets.REGISTRY_URL }}
           username: ${{ secrets.REGISTRY_USER }}
           password: ${{ secrets.REGISTRY_PASSWORD }}
 
-      - name: Build K8s tools image
-        if: |
-          always() &&
-          env.K8S-TOOLS_CHANGED == 'true' &&
-          env.BUILD_CHILDREN == 'true'
-        uses: redhat-actions/buildah-build@v2
-        id: build_k8s
-        with:
-          image: ${{ env.K8S_TOOLS_IMG_NAME }}
-          tags: ${{ env.IMG_TAGS }}
-          oci: true
-          context:
-            ${{ env.K8S_TOOLS_IMG_DIR }}
-          dockerfiles:
-            ${{ env.K8S_TOOLS_IMG_DIR }}/Containerfile
-          build-args: |
+#      - name: Build K8s tools image
+#        if: |
+#          always() &&
+#          env.K8S-TOOLS_CHANGED == 'true' &&
+#          env.BUILD_CHILDREN == 'true'
+#        uses: redhat-actions/buildah-build@v2
+#        id: build_k8s
+#        with:
+#         image: ${{ env.K8S_TOOLS_IMG_NAME }}
+#          tags: ${{ env.IMG_TAGS }}
+#          oci: true
+#          context:
+#            ${{ env.K8S_TOOLS_IMG_DIR }}
+#          dockerfiles:
+#            ${{ env.K8S_TOOLS_IMG_DIR }}/Containerfile
+#          build-args: |
+#            BASE_IMG=${{ env.BASE_IMG }}
+
+#      - name: Push K8s tools image
+#        if: |
+#          steps.build_k8s.outcome == 'success' &&
+#          steps.commit_data.outputs.is_pr == 'false'
+#        uses: redhat-actions/push-to-registry@v2
+#        with:
+#          image: ${{ env.K8S_TOOLS_IMG_NAME }}
+#          tags: ${{ env.IMG_TAGS }}
+#          registry: ${{ env.REGISTRY_URL }}
+#          username: ${{ secrets.REGISTRY_USER }}
+#          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+#      - name: Build Node image
+#        if: |
+#          always() &&
+#          env.NODE_CHANGED == 'true' &&
+#          env.BUILD_CHILDREN == 'true'
+#        id: build_node
+#        uses: redhat-actions/buildah-build@v2
+#        with:
+#          image: ${{ env.NODE_IMG_NAME }}
+#          tags: ${{ env.IMG_TAGS }}
+#          oci: true
+#          context:
+#            ${{ env.NODE_IMG_DIR }}
+#          dockerfiles:
+#            ${{ env.NODE_IMG_DIR }}/Containerfile
+#          build-args: |
+#            BASE_IMG=${{ env.BASE_IMG }}
+
+#      - name: Push Node image
+#        if: |
+#          steps.build_node.outcome == 'success' &&
+#          steps.commit_data.outputs.is_pr == 'false'
+#        uses: redhat-actions/push-to-registry@v2
+#        with:
+#          image: ${{ env.NODE_IMG_NAME }}
+#          tags: ${{ env.IMG_TAGS }}
+#          registry: ${{ env.REGISTRY_URL }}
+#          username: ${{ secrets.REGISTRY_USER }}
+#          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+#      - name: Build Java image
+#        if: |
+#          always() &&
+#          env.JAVA_CHANGED == 'true' &&
+#          env.BUILD_CHILDREN == 'true'
+#        id: build_java
+#        uses: redhat-actions/buildah-build@v2
+#        with:
+#          image: ${{ env.JAVA_IMG_NAME }}
+#          tags: ${{ env.IMG_TAGS }}
+#          oci: true
+#          context:
+#            ${{ env.JAVA_IMG_DIR }}
+#          dockerfiles:
+#            ${{ env.JAVA_IMG_DIR }}/Containerfile
+#          build-args: |
             BASE_IMG=${{ env.BASE_IMG }}
 
-      - name: Push K8s tools image
-        if: |
-          steps.build_k8s.outcome == 'success' &&
-          steps.commit_data.outputs.is_pr == 'false'
-        uses: redhat-actions/push-to-registry@v2
-        with:
-          image: ${{ env.K8S_TOOLS_IMG_NAME }}
-          tags: ${{ env.IMG_TAGS }}
-          registry: ${{ env.REGISTRY_URL }}
-          username: ${{ secrets.REGISTRY_USER }}
-          password: ${{ secrets.REGISTRY_PASSWORD }}
-
-      - name: Build Node image
-        if: |
-          always() &&
-          env.NODE_CHANGED == 'true' &&
-          env.BUILD_CHILDREN == 'true'
-        id: build_node
-        uses: redhat-actions/buildah-build@v2
-        with:
-          image: ${{ env.NODE_IMG_NAME }}
-          tags: ${{ env.IMG_TAGS }}
-          oci: true
-          context:
-            ${{ env.NODE_IMG_DIR }}
-          dockerfiles:
-            ${{ env.NODE_IMG_DIR }}/Containerfile
-          build-args: |
-            BASE_IMG=${{ env.BASE_IMG }}
-
-      - name: Push Node image
-        if: |
-          steps.build_node.outcome == 'success' &&
-          steps.commit_data.outputs.is_pr == 'false'
-        uses: redhat-actions/push-to-registry@v2
-        with:
-          image: ${{ env.NODE_IMG_NAME }}
-          tags: ${{ env.IMG_TAGS }}
-          registry: ${{ env.REGISTRY_URL }}
-          username: ${{ secrets.REGISTRY_USER }}
-          password: ${{ secrets.REGISTRY_PASSWORD }}
-
-      - name: Build Java image
-        if: |
-          always() &&
-          env.JAVA_CHANGED == 'true' &&
-          env.BUILD_CHILDREN == 'true'
-        id: build_java
-        uses: redhat-actions/buildah-build@v2
-        with:
-          image: ${{ env.JAVA_IMG_NAME }}
-          tags: ${{ env.IMG_TAGS }}
-          oci: true
-          context:
-            ${{ env.JAVA_IMG_DIR }}
-          dockerfiles:
-            ${{ env.JAVA_IMG_DIR }}/Containerfile
-          build-args: |
-            BASE_IMG=${{ env.BASE_IMG }}
-
-      - name: Push Java image
-        if: |
-          steps.build_java.outcome == 'success' &&
-          steps.commit_data.outputs.is_pr == 'false'
-        uses: redhat-actions/push-to-registry@v2
-        with:
-          image: ${{ env.JAVA_IMG_NAME }}
-          tags: ${{ env.IMG_TAGS }}
-          registry: ${{ env.REGISTRY_URL }}
-          username: ${{ secrets.REGISTRY_USER }}
-          password: ${{ secrets.REGISTRY_PASSWORD }}
+#      - name: Push Java image
+#        if: |
+#          steps.build_java.outcome == 'success' &&
+#          steps.commit_data.outputs.is_pr == 'false'
+#        uses: redhat-actions/push-to-registry@v2
+#        with:
+#          image: ${{ env.JAVA_IMG_NAME }}
+#          tags: ${{ env.IMG_TAGS }}
+#          registry: ${{ env.REGISTRY_URL }}
+#          username: ${{ secrets.REGISTRY_USER }}
+#         password: ${{ secrets.REGISTRY_PASSWORD }}
