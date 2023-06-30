@@ -120,15 +120,15 @@ jobs:
           dockerfiles:
             ${{ env.BASE_IMG_DIR }}/Containerfile
 
-#      - name: Push base image
-#        if: steps.commit_data.outputs.is_pr == 'false' && env.BASE_CHANGED == 'true'
-#        uses: redhat-actions/push-to-registry@v2
-#        with:
-#          image: ${{ env.BASE_IMG_NAME }}
-#          tags: ${{ env.IMG_TAGS }}
-#          registry: ${{ secrets.REGISTRY_URL }}
-#          username: ${{ secrets.REGISTRY_USER }}
-#          password: ${{ secrets.REGISTRY_PASSWORD }}
+      - name: Push base image
+        if: steps.commit_data.outputs.is_pr == 'false' && env.BASE_CHANGED == 'true'
+        uses: redhat-actions/push-to-registry@v2
+        with:
+          image: ${{ env.BASE_IMG_NAME }}
+          tags: ${{ env.IMG_TAGS }}
+          registry: ${{ secrets.REGISTRY_URL }}
+          username: ${{ secrets.REGISTRY_USER }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
 
       - name: Determine if child images should be built
         run: |
