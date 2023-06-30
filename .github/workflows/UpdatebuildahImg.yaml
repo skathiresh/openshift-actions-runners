@@ -3,8 +3,8 @@ on:
   workflow_dispatch:
 
 env:
-  BASE_IMG_NAME: runner
-  BASE_IMG_DIR: base
+#  BASE_IMG_NAME: runner
+#  BASE_IMG_DIR: base
 
   BUILDAH_IMG_NAME: buildah-runner
   BUILDAH_IMG_DIR: buildah
@@ -38,7 +38,6 @@ jobs:
 
             const BASE = "base";
             const dirsChanged = {
-              [BASE]: false,
               buildah: false,
             };
 
@@ -106,44 +105,6 @@ jobs:
           export BASE_IMG=${{ env.BASE_IMG_NAME }}:$FIRST_TAG
           echo "Base image is '$BASE_IMG'"
           echo BASE_IMG=$BASE_IMG >> $GITHUB_ENV
-
-      - name: Build base image
-        if: env.BASE_CHANGED == 'true'
-        uses: redhat-actions/buildah-build@v2
-        id: build_base_img
-        with:
-          image: ${{ env.BASE_IMG_NAME }}
-          tags: ${{ env.IMG_TAGS }}
-          oci: true
-          context:
-            ${{ env.BASE_IMG_DIR }}
-          dockerfiles:
-            ${{ env.BASE_IMG_DIR }}/Containerfile
-
-      - name: Push base image
-        if: steps.commit_data.outputs.is_pr == 'false' && env.BASE_CHANGED == 'true'
-        uses: redhat-actions/push-to-registry@v2
-        with:
-          image: ${{ env.BASE_IMG_NAME }}
-          tags: ${{ env.IMG_TAGS }}
-          registry: ${{ secrets.REGISTRY_URL }}
-          username: ${{ secrets.REGISTRY_USER }}
-          password: ${{ secrets.REGISTRY_PASSWORD }}
-
-      - name: Determine if child images should be built
-        run: |
-          export BUILD_BASE_OUTCOME="${{ steps.build_base_img.outcome }}"
-
-          if [[ $BUILD_BASE_OUTCOME == "success" ]] || [[ $BUILD_BASE_OUTCOME == "skipped" ]]; then
-            echo "Base image was built or did not need to be built"
-            echo "Child images will be built"
-            export BUILD_CHILDREN=true
-          else
-            export BUILD_CHILDREN=false
-            echo "Base image build failed"
-            echo "Child image builds will be skipped."
-          fi
-          echo "BUILD_CHILDREN=$BUILD_CHILDREN" >> $GITHUB_ENV
 
       - name: Build buildah image
         if: |
